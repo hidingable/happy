@@ -3,6 +3,7 @@
     "private": true,
     "scripts": {
         "cli": "yarn workspace happy cli",
+        "happy:remote:dev": "yarn workspace happy build && node --env-file=packages/happy-cli/.env.remote-dev packages/happy-cli/bin/happy.mjs daemon start",
         "release": "node ./scripts/release.cjs",
         "web": "yarn workspace happy-app web",
         "app-logs": "yarn workspace happy-app-logs start",

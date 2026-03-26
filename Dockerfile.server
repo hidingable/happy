@@ -2,7 +2,10 @@
 FROM node:20 AS deps
 
 # Install build dependencies
-RUN apt-get update && apt-get install -y python3 ffmpeg make g++ build-essential && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources \
+ && apt-get update \
+ && apt-get install -y python3 ffmpeg make g++ build-essential \
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /repo
 
@@ -40,10 +43,14 @@ FROM node:20 AS runner
 WORKDIR /repo
 
 # Runtime dependencies
-RUN apt-get update && apt-get install -y python3 ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN sed -i 's@deb.debian.org@mirrors.aliyun.com@g' /etc/apt/sources.list.d/debian.sources \
+ && apt-get update \
+ && apt-get install -y python3 ffmpeg \
+ && rm -rf /var/lib/apt/lists/*
 
 # Set environment to production
 ENV NODE_ENV=production
+ENV DB_PROVIDER=pglite
 
 # Copy necessary files from the builder stage
 COPY --from=builder /repo/node_modules /repo/node_modules
@@ -51,7 +58,7 @@ COPY --from=builder /repo/packages/happy-wire /repo/packages/happy-wire
 COPY --from=builder /repo/packages/happy-server /repo/packages/happy-server
 
 # Expose the port the app will run on
-EXPOSE 3000
+EXPOSE 3005
 
-# Command to run the application
-CMD ["yarn", "--cwd", "packages/happy-server", "start"]
+# Run the self-contained standalone server with embedded PGlite storage.
+CMD ["sh", "-lc", "yarn --cwd packages/happy-server standalone migrate && yarn --cwd packages/happy-server standalone serve"]

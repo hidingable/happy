@@ -1,0 +1,16 @@
+services:
+  happy-server:
+    build:
+      context: ../..
+      dockerfile: Dockerfile.server
+    container_name: happy-server
+    restart: unless-stopped
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-3005}:3005"
+    volumes:
+      - happy_server_data:/data
+
+volumes:
+  happy_server_data:
